@@ -95,15 +95,15 @@ def make_tree(root, prev_feature_value, xTrain, yTrain, class_list):
             if branch == "?":
                 feature_value_data = train_data[train_data[max_info_feature] == node]
                 make_tree(next_root, node, feature_value_data, yTrain, class_list)
+    return root
 
 
 
 def id3(xTrainO, yTrainO):
     xTrain = xTrainO.copy()
     yTrain = yTrainO.copy()
-    tree = {}
     class_list = yTrain.unique()
-    make_tree(tree, None, xTrain, yTrain, class_list)
+    tree = make_tree({}, None, xTrain, yTrain, class_list)
     return tree
 
 def predict(tree, instance):
