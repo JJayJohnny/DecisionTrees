@@ -1,4 +1,5 @@
 import numpy as np
+import commons
 
 def calc_total_entropy(xTrain, yTrain, class_list):
     total_row = xTrain.shape[0]
@@ -48,6 +49,7 @@ def find_most_informative_feature(xTrain, yTrain, class_list):
 
     for feature in feature_list:
         feature_info_gain = calc_info_gain(feature, xTrain, yTrain, class_list)
+        # feature_info_gain = commons.compute_info_gain(xTrain[feature], yTrain)
         if max_info_gain < feature_info_gain:  # selecting feature name with highest information gain
             max_info_gain = feature_info_gain
             max_info_feature = feature
@@ -56,8 +58,7 @@ def find_most_informative_feature(xTrain, yTrain, class_list):
 
 
 def generate_sub_tree(feature_name, xTrain, yTrain, class_list):
-    feature_value_count_dict = xTrain[feature_name].value_counts(
-        sort=False)
+    feature_value_count_dict = xTrain[feature_name].value_counts(sort=False)
     tree = {}
 
     for feature_value, count in feature_value_count_dict.items():
