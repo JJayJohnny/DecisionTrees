@@ -1,6 +1,10 @@
+from numbers import Number
 import numpy as np
 import pandas as pd
 import random
+
+from pandas.core.dtypes.common import is_string_dtype
+
 
 class c45Node:
     def __init__(self, min_samples_split=2, max_depth=None, seed=2,
@@ -49,29 +53,39 @@ class c45Node:
         best_threshold = None
 
         for attribute in xTrain.keys():
-            # only for continuous attributes
-            sorted_index = xTrain[attribute].sort_values(ascending=True).index
-            sorted_sample_data = xTrain[attribute][sorted_index]
-            sorted_sample_target = yTrain[sorted_index]
+            if is_string_dtype(xTrain[attribute]):
 
-            for j in range(0, len(sorted_sample_data) - 1):
+                aig = self.compute_info_gain(xTrain[attribute], yTrain)
 
-                classification = pd.Series(dtype='str')
+                if aig > info_gain_max:
+                    splitter = xTrain[attribute]
+                    info_gain_max = aig
+                    best_attribute = attribute
+                    best_threshold = None
+            else:
+                # only for continuous attributes
+                sorted_index = xTrain[attribute].sort_values(ascending=True).index
+                sorted_sample_data = xTrain[attribute][sorted_index]
+                sorted_sample_target = yTrain[sorted_index]
 
-                if sorted_sample_data.iloc[j] != sorted_sample_data.iloc[j + 1]:
-                    threshold = (sorted_sample_data.iloc[j] + sorted_sample_data.iloc[j + 1]) / 2
-                    # assign all the values of the same attribute as either grater or lesser than threshold
-                    classification = xTrain[attribute] > threshold
-                    classification[classification] = 'greater'
-                    classification[classification == False] = 'lesser'
+                for j in range(0, len(sorted_sample_data) - 1):
 
-                    aig = self.compute_info_gain(classification, yTrain)
-                    # save the best threshold split
-                    if aig >= info_gain_max:
-                        splitter = classification
-                        info_gain_max = aig
-                        best_attribute = attribute
-                        best_threshold = threshold
+                    classification = pd.Series(dtype='str')
+
+                    if sorted_sample_data.iloc[j] != sorted_sample_data.iloc[j + 1]:
+                        threshold = (sorted_sample_data.iloc[j] + sorted_sample_data.iloc[j + 1]) / 2
+                        # assign all the values of the same attribute as either grater or lesser than threshold
+                        classification = xTrain[attribute] > threshold
+                        classification[classification] = 'greater'
+                        classification[classification == False] = 'lesser'
+
+                        aig = self.compute_info_gain(classification, yTrain)
+                        # save the best threshold split
+                        if aig >= info_gain_max:
+                            splitter = classification
+                            info_gain_max = aig
+                            best_attribute = attribute
+                            best_threshold = threshold
         return best_attribute, best_threshold, splitter
 
     def compute_entropy(self, sampleSplit):
@@ -124,11 +138,16 @@ class c45Node:
         else:
             attr_val = sample[self.split_feat_name]
 
-            #only for numeric values
-            if attr_val > self.threshold:
-                child = self.children['greater']
+            if not isinstance(attr_val, Number):
+                child = self.children[attr_val]
+                if self.verbose:
+                    print("Testing ", self.split_feat_name, "->", attr_val)
             else:
-                child = self.children['lesser']
+                #only for numeric values
+                if attr_val > self.threshold:
+                    child = self.children['greater']
+                else:
+                    child = self.children['lesser']
             return child.predict(sample)
 
     def evaluate(self, xTest, yTest):

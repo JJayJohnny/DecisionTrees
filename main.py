@@ -1,9 +1,10 @@
 import pandas as pd
-import id3
 import c45
 import id3New
 from sklearn.model_selection import train_test_split
+from sklearn import tree
 import time
+import matplotlib.pyplot as plt
 
 dataLoc='data/waterQuality1.csv'
 
@@ -14,19 +15,14 @@ def GetData(location):
 if __name__ == '__main__':
     print("Main")
     data = GetData(dataLoc)
-    data = data.head(1000)
+    data = data.head(500)
     xTrain, xTest, yTrain, yTest = train_test_split(data.drop('is_safe', axis=1), data['is_safe'], test_size=0.2)
-    start = time.time()
-    tree = id3.id3(xTrain, yTrain)
-    stop = time.time()
-    print(tree)
-    print("ID3:")
-    print("Accuracy on train data: "+str(id3.evaluate(tree, xTrain, yTrain)))
-    print("Accuracy on test data: "+str(id3.evaluate(tree, xTest, yTest)))
-    print("Training time: "+str(stop-start))
 
-    print("\nC4.5:")
-    c45 = c45.c45Node(max_depth=3)
+    print("Number of training samples: "+str(xTrain.shape[0]))
+    print("Number of testing samples: "+str(xTest.shape[0]))
+
+    print("C4.5:")
+    c45 = c45.c45Node()
     start = time.time()
     c45.recursiveGenerateTree(xTrain, yTrain, 0)
     stop = time.time()
@@ -42,6 +38,19 @@ if __name__ == '__main__':
     print("Accuracy on train data: " + str(id3.evaluate(xTrain, yTrain)))
     print("Accuracy on test data: " + str(id3.evaluate(xTest, yTest)))
     print("Training time: " + str(stop - start))
+
+    libTree = tree.DecisionTreeClassifier()
+    start = time.time()
+    libTree = libTree.fit(xTrain, yTrain)
+    stop = time.time()
+    print("Scikit learn DecisionTreeClassifier:")
+    print("Accuracy on train data: " + str(libTree.score(xTrain, yTrain)))
+    print("Accuracy on test data: " + str(libTree.score(xTest, yTest)))
+    print("Training time: " + str(stop - start))
+    tree.plot_tree(libTree)
+    plt.show()
+
+
 
 
 
