@@ -140,8 +140,6 @@ class c45Node:
 
             if not isinstance(attr_val, Number):
                 child = self.children[attr_val]
-                if self.verbose:
-                    print("Testing ", self.split_feat_name, "->", attr_val)
             else:
                 #only for numeric values
                 if attr_val > self.threshold:
