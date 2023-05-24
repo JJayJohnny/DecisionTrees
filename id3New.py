@@ -18,8 +18,6 @@ class id3Node:
     def recursiveGenerateTree(self, xTrain, yTrain, current_depth):
         if len(yTrain.unique()) == 1:
             self.decision = yTrain.unique()[0]
-        elif len(yTrain) < self.min_samples_split:
-            self.decision = self.getMajClass(yTrain)
         elif current_depth == self.max_depth:
             self.decision = self.getMajClass(yTrain)
         else:
@@ -48,7 +46,6 @@ class id3Node:
         best_threshold = None
 
         for attribute in xTrain.keys():
-            # only for continuous attributes
             sorted_index = xTrain[attribute].sort_values(ascending=True).index
             sorted_sample_data = xTrain[attribute][sorted_index]
             sorted_sample_target = yTrain[sorted_index]
