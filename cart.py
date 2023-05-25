@@ -1,14 +1,9 @@
 from numbers import Number
 import numpy as np
-import pandas as pd
 import random
 
-from pandas.core.dtypes.common import is_string_dtype
-
-
 class cartNode:
-    def __init__(self, min_samples_split=2, max_depth=None, seed=2, verbose=False):
-        # Sub nodes -- recursive, those elements of the same type (TreeNode)
+    def __init__(self, min_samples_split=2, max_depth=None, seed=2):
         self.children = {}
         self.decision = None
         self.split_feat_name = None  # Splitting feature
@@ -17,10 +12,8 @@ class cartNode:
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
         self.seed = seed  # Seed for random numbers
-        self.verbose = verbose  # True to print the splits
 
     def recursiveGenerateTree(self, xTrain, yTrain, current_depth):
-        # print(xTrain.shape[0])
         remainingClasses = np.unique(yTrain)
         if len(remainingClasses) == 1:
             self.decision = remainingClasses[0]
@@ -49,17 +42,11 @@ class cartNode:
                 self.decision = self.getMajClass(yTrain)
                 return
 
-            # if X_left.shape[0] == 0 or X_right.shape[0] == 0:
-            #     self.children[v] = cartNode(min_samples_split=self.min_samples_split, max_depth=1, seed=self.seed,verbose=self.verbose)
-            #     self.children[v].recursiveGenerateTree(xTrain, yTrain, current_depth=1)
             # v is 'greater' or 'lesser'
-            # index = splitter == v
-            self.children['greater'] = cartNode(min_samples_split=self.min_samples_split, max_depth=self.max_depth, seed=self.seed, verbose=self.verbose)
+            self.children['greater'] = cartNode(min_samples_split=self.min_samples_split, max_depth=self.max_depth, seed=self.seed)
             self.children['greater'].recursiveGenerateTree(X_right, y_right, current_depth)
-            self.children['lesser'] = cartNode(min_samples_split=self.min_samples_split, max_depth=self.max_depth, seed=self.seed, verbose=self.verbose)
+            self.children['lesser'] = cartNode(min_samples_split=self.min_samples_split, max_depth=self.max_depth, seed=self.seed)
             self.children['lesser'].recursiveGenerateTree(X_left, y_left, current_depth)
-
-
 
 
     def gini_best_score(self, y, possible_splits):
@@ -72,13 +59,11 @@ class cartNode:
             right_positive = 0
             right_negative = 0
             for i in range(0, possible_split):
-                # if y.iloc[i] == 1:
                 if y[i] == 1:
                     left_positive = left_positive + 1
                 else:
                     left_negative = left_negative + 1
             for i in range(possible_split, len(y)):
-                # if y.iloc[i] == 1:
                 if y[i] == 1:
                     right_positive = right_positive + 1
                 else:
@@ -104,7 +89,6 @@ class cartNode:
     def find_possible_splits(self, data):
         possible_split_points = []
         for idx in range(data.shape[0] - 1):
-            # if data.iloc[idx] != data.iloc[idx + 1]:
             if data[idx] != data[idx + 1]:
                 possible_split_points.append(idx)
         return possible_split_points
@@ -114,14 +98,11 @@ class cartNode:
         bestSplitIndex = None
         bestSplitArgument = None
 
-        # selected_features = X.keys()
         selected_features = range(X.shape[1])
 
         for d in selected_features:
-            # order = X.sort_values(by=d).index
             order = np.argsort(X[:, d])
             y_sorted = y[order]
-            # possible_splits = self.find_possible_splits(X[d][order])
             possible_splits = self.find_possible_splits(X[order, d])
             idx, value = self.gini_best_score(y_sorted, possible_splits)
             if value > best_gain:
@@ -132,18 +113,15 @@ class cartNode:
         if bestSplitArgument is None:
             return None, None
 
-        # bestSplitValue = (X[bestSplitArgument].iloc[bestSplitIndex] + X[bestSplitArgument].iloc[bestSplitIndex+1])/2
         bestSplitValue = (X[bestSplitIndex, bestSplitArgument] + X[bestSplitIndex+1, bestSplitArgument])/2
 
         return bestSplitArgument, bestSplitValue
 
     def getMajClass(self, yTrain):
 
-        # freq = yTrain.value_counts().sort_values(ascending=False)
         values, counts = np.unique(yTrain, return_counts=True)
 
         # Select the name of the class (classes) that has the max number of records
-        # MajClass = freq.keys()[freq == freq.max()]
         majClass = values[counts == counts.max()]
         # If there are two classes with equal number of records, select one randomly
         if len(majClass) > 1:
@@ -177,9 +155,7 @@ class cartNode:
         correct_preditct = 0
         wrong_preditct = 0
         for index in range(xTest.shape[0]):
-            # result = self.predict(xTest.iloc[index])
             result = self.predict(xTest[index])
-            # if result == yTest.iloc[index]:
             if result == yTest[index]:
                 correct_preditct += 1
             else:

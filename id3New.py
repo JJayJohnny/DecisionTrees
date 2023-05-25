@@ -1,10 +1,8 @@
 import numpy as np
-import pandas as pd
 import random
 
 class id3Node:
-    def __init__(self, min_samples_split=2, max_depth=None, seed=2, verbose=False):
-        # Sub nodes -- recursive, those elements of the same type (TreeNode)
+    def __init__(self, min_samples_split=2, max_depth=None, seed=2):
         self.children = {}
         self.decision = None
         self.split_feat_name = None  # Splitting feature
@@ -13,7 +11,6 @@ class id3Node:
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
         self.seed = seed  # Seed for random numbers
-        self.verbose = verbose  # True to print the splits
 
     def recursiveGenerateTree(self, xTrain, yTrain, current_depth):
         remainingClasses = np.unique(yTrain)
@@ -33,27 +30,22 @@ class id3Node:
             for v in np.unique(splitter):
                 # v is 'greater' or 'lesser'
                 index = splitter == v
-                # if len(xTrain[index]) > 0:
                 if len(xTrain[index, best_attribute]) > 0:
-                    self.children[v] = id3Node(min_samples_split=self.min_samples_split, max_depth=self.max_depth, seed=self.seed, verbose=self.verbose)
+                    self.children[v] = id3Node(min_samples_split=self.min_samples_split, max_depth=self.max_depth, seed=self.seed)
                     self.children[v].recursiveGenerateTree(xTrain[index, :], yTrain[index], current_depth)
                 else:
                     #
-                    self.children[v] = id3Node(min_samples_split=self.min_samples_split, max_depth=1, seed=self.seed, verbose=self.verbose)
+                    self.children[v] = id3Node(min_samples_split=self.min_samples_split, max_depth=1, seed=self.seed)
                     self.children[v].recursiveGenerateTree(xTrain, yTrain, current_depth=1)
 
     def splitAttribute(self, xTrain, yTrain):
         info_gain_max = -np.inf  # Info gain set to a minimun
 
-        # splitter = pd.Series(dtype='str')
         splitter = []
         best_attribute = None
         best_threshold = None
 
         for attribute in range(xTrain.shape[1]):
-            # sorted_index = xTrain[attribute].sort_values(ascending=True).index
-            # sorted_sample_data = xTrain[attribute][sorted_index]
-            # sorted_sample_target = yTrain[sorted_index]
 
             aig = self.compute_info_gain(xTrain[:, attribute], yTrain)
 
@@ -69,28 +61,23 @@ class id3Node:
         if len(sampleSplit) < 2:
             return 0
         else:
-            # freq = np.array(sampleSplit.value_counts(normalize=True))
             values, freq = np.unique(sampleSplit, return_counts=True)
             freq = freq / len(sampleSplit)
             return -(freq * np.log2(freq + 1e-6)).sum()
 
     def compute_info_gain(self, sampleAttribute, sample_target):
 
-        # values = sampleAttribute.value_counts(normalize=True)
         values, counts = np.unique(sampleAttribute, return_counts=True)
         counts = counts / len(sampleAttribute)
         split_ent = 0
 
         # Iterate for each class of the sample attribute
-        # for v, fr in values.items():
         for i in range(len(values)):
 
-            # index = sampleAttribute == v
             index = sampleAttribute == values[i]
             sub_ent = self.compute_entropy(sample_target[index])
 
             # Weighted sum of the entropies
-            # split_ent += fr * sub_ent
             split_ent += counts[i] * sub_ent
 
         # Compute the entropy without any split
@@ -99,11 +86,9 @@ class id3Node:
 
     def getMajClass(self, yTrain):
 
-        # freq = yTrain.value_counts().sort_values(ascending=False)
         values, counts = np.unique(yTrain, return_counts=True)
 
         # Select the name of the class (classes) that has the max number of records
-        # MajClass = freq.keys()[freq == freq.max()]
         majClass = values[counts == counts.max()]
         # If there are two classes with equal number of records, select one randomly
         if len(majClass) > 1:
