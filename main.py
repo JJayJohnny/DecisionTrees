@@ -126,6 +126,7 @@ if __name__ == '__main__':
     xTest = xTest.to_numpy()
     yTrain = yTrain.to_numpy()
     yTest = yTest.to_numpy()
+
     cartTree = cart.cartNode()
     start = time.time()
     cartTree.recursiveGenerateTree(xTrain, yTrain, 0)
@@ -133,6 +134,14 @@ if __name__ == '__main__':
     print(str(stop-start))
     print(cartTree.evaluate(xTest, yTest))
     print(cartTree.evaluate(xTrain, yTrain))
+
+    c45Tree = c45.c45Node()
+    start = time.time()
+    c45Tree.recursiveGenerateTree(xTrain, yTrain, 0)
+    stop = time.time()
+    print(str(stop - start))
+    print(c45Tree.evaluate(xTest, yTest))
+    print(c45Tree.evaluate(xTrain, yTrain))
 
 
 
