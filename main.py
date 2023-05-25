@@ -120,8 +120,12 @@ if __name__ == '__main__':
     # plt.savefig("accuracy.png")
 
     fullData = GetData(dataLoc)
-    data = fullData.head(500)
+    data = fullData.head(7999)
     xTrain, xTest, yTrain, yTest = train_test_split(data.drop('is_safe', axis=1), data['is_safe'], test_size=0.2)
+    xTrain = xTrain.to_numpy()
+    xTest = xTest.to_numpy()
+    yTrain = yTrain.to_numpy()
+    yTest = yTest.to_numpy()
     cartTree = cart.cartNode()
     start = time.time()
     cartTree.recursiveGenerateTree(xTrain, yTrain, 0)
@@ -130,13 +134,7 @@ if __name__ == '__main__':
     print(cartTree.evaluate(xTest, yTest))
     print(cartTree.evaluate(xTrain, yTrain))
 
-    id3Tree = id3New.id3Node()
-    start = time.time()
-    id3Tree.recursiveGenerateTree(xTrain, yTrain, 0)
-    stop = time.time()
-    print(str(stop - start))
-    print(id3Tree.evaluate(xTest, yTest))
-    print(id3Tree.evaluate(xTrain, yTrain))
+
 
 
 
