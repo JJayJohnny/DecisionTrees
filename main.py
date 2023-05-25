@@ -143,6 +143,14 @@ if __name__ == '__main__':
     print(c45Tree.evaluate(xTest, yTest))
     print(c45Tree.evaluate(xTrain, yTrain))
 
+    id3Tree = id3New.id3Node()
+    start = time.time()
+    id3Tree.recursiveGenerateTree(xTrain, yTrain, 0)
+    stop = time.time()
+    print(str(stop - start))
+    print(id3Tree.evaluate(xTest, yTest))
+    print(id3Tree.evaluate(xTrain, yTrain))
+
 
 
 
