@@ -1,6 +1,6 @@
 import pandas as pd
 import c45
-import id3New
+import id3
 from sklearn.model_selection import train_test_split
 from sklearn import tree
 import time
@@ -49,13 +49,13 @@ if __name__ == '__main__':
         print("\nNumber of training samples: "+str(xTrain.shape[0]))
         print("Number of testing samples: "+str(xTest.shape[0]))
 
-        id3 = id3New.id3Node()
+        id3Tree = id3.id3Node()
         start = time.time()
-        id3.recursiveGenerateTree(xTrain, yTrain, 0)
+        id3Tree.recursiveGenerateTree(xTrain, yTrain, 0)
         stop = time.time()
         trainTime = stop - start
-        trainAccuracy = id3.evaluate(xTrain, yTrain)
-        testAccuracy = id3.evaluate(xTest, yTest)
+        trainAccuracy = id3Tree.evaluate(xTrain, yTrain)
+        testAccuracy = id3Tree.evaluate(xTest, yTest)
         print("ID3:")
         print("Accuracy on train data: " + str(trainAccuracy))
         print("Accuracy on test data: " + str(testAccuracy))
