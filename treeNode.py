@@ -38,3 +38,25 @@ class TreeNode:
                 wrong_preditct += 1
         accuracy = correct_preditct / (correct_preditct + wrong_preditct)
         return accuracy
+
+    def getMaxWidth(self, maxWidth):
+        width = len(self.children.items())
+        if width > maxWidth:
+            maxWidth = width
+        for key, value in self.children.items():
+            width = value.getMaxWidth(maxWidth)
+            if width > maxWidth:
+                maxWidth = width
+        return maxWidth
+
+    def getMaxDepth(self, depth):
+        depth += 1
+        d = []
+        for key, value in self.children.items():
+            d.append(value.getMaxDepth(depth))
+        if len(d) == 0:
+            return depth
+        else:
+            return max(d)
+
+
